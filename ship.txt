@@ -1,0 +1,352 @@
+package internship;
+import java.util.*; 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+interface pin_sheet{
+	
+	public void show_sheet();
+	public void generate_labels();
+}
+
+class login{
+	String pcode1;String pcode2;
+	/*static String cid[]=new String[5];
+	static String pwd[]=new String[5];
+	static String name[]=new String[5];
+	static String address[]=new String[5];
+	static String wallet[]=new String[5];*/
+	
+	static List<String> c_id,Pass_list,wallet_list,name_list,address_list;
+	int search(String custid,String pass) {
+		String line = "";  
+		String splitBy = ","; 
+		String cid[]=new String[5];
+		String pwd[]=new String[5];
+		String name[]=new String[5];
+		String address[]=new String[5];
+		String wallet[]=new String[5];
+		int i=0;
+		try {
+		BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\HP\\Desktop\\login.csv")); 
+		while ((line = br.readLine()) != null)   //returns a Boolean value  
+		{  
+		String[] id = line.split(splitBy);    // use comma as separator  
+		cid[i]=id[0];
+		pwd[i]=id[1];
+		name[i]=id[2];
+		address[i]=id[3];
+		wallet[i]=id[4];
+		i++;
+		//System.out.println(pin[0] + "----->>>"+pin[1]+"\n" );  
+		}  
+		}
+		catch (IOException e)   
+		{  
+		e.printStackTrace();  
+		} 
+		c_id = Arrays.asList(cid);
+		Pass_list = Arrays.asList(pwd);
+		name_list = Arrays.asList(name);
+		address_list = Arrays.asList(address);
+		wallet_list = Arrays.asList(wallet);
+		
+		int res=0;
+		//System.out.println(custid + pass);
+		if(c_id.contains(custid)) {
+			if(pass.equals(Pass_list.get(c_id.indexOf(custid))))
+				res= 1;
+			else
+				res=-1;
+		}
+		else
+			res= -1;
+		return res;
+	}
+	
+	void details(String custid) {
+		System.out.println("\n\n--------------------------------------------------------------");
+		System.out.println("\t\t\tBILL RECEIPT");
+		System.out.println("--------------------------------------------------------------");
+		
+		System.out.println("Name: "+name_list.get(c_id.indexOf(custid)));
+		System.out.println("Address: "+address_list.get(c_id.indexOf(custid)));
+		System.out.println("Customer Id: "+c_id.get(c_id.indexOf(custid)));
+		System.out.println("Source PinCode: "+pcode1);
+		System.out.println("Destination PinCode: "+pcode2);
+		System.out.println("Amt in Wallet: "+wallet_list.get(c_id.indexOf(custid)));
+		//int a=Integer.parseInt(wallet_list.get(c_id.indexOf(custid)));
+	}
+	void bill(int amt,String custid) {
+		details(custid);
+		int due=0;
+		if(amt <= Integer.parseInt(wallet_list.get(c_id.indexOf(custid)))) {
+			//wallet_list.set(c_id.indexOf(custid),"0");
+			due=0;
+			wallet_list.set(c_id.indexOf(custid),String.valueOf(Integer.parseInt(wallet_list.get(c_id.indexOf(custid)))-amt));
+		}
+		else {
+			due=amt-Integer.parseInt(wallet_list.get(c_id.indexOf(custid)));
+			wallet_list.set(c_id.indexOf(custid),"0");
+		}
+		System.out.println("\n\n--------------------------------------------------------------");
+		System.out.println("Total Amount due: "+due);
+		System.out.println("Remaining Amount: "+wallet_list.get(c_id.indexOf(custid)));
+		System.out.println("--------------------------------------------------------------");
+	}
+	int recharge_wallet(int amt,String custid) {
+		wallet_list.set(c_id.indexOf(custid),String.valueOf(Integer.parseInt(wallet_list.get(c_id.indexOf(custid)))+amt));
+		details(custid);
+		return 1;
+	}
+
+}
+class p2pbill extends login implements pin_sheet{
+	
+	static List<String> city_1, pincode;
+	List<String> list ,list1,costs ;
+	void get_code(String pcode1,String pcode2) {
+		System.out.println("-------------\n");
+		this.pcode1=pcode1;
+		this.pcode2=pcode2;
+	}
+	p2pbill() {
+		
+		String pin1[]=new String[20];
+		String pin2[]=new String[20];
+		String cost[]=new String[20];
+		String line = "";  
+		String splitBy = ","; 
+		int i=0;
+		try {
+		BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\HP\\Desktop\\pintoPin.csv")); 
+		while ((line = br.readLine()) != null)   //returns a Boolean value  
+		{  
+		String[] pin = line.split(splitBy);    // use comma as separator  
+		pin1[i]=pin[0];
+		pin2[i]=pin[1];
+		cost[i]=pin[2];
+		i++;
+		//System.out.println(pin[0] + "----->>>"+pin[1]+"\n" );  
+		}  
+		}
+		catch (IOException e)   
+		{  
+		e.printStackTrace();  
+		}
+		System.out.println("\n********************");
+	    System.out.println("\t\tPrice Chart:");
+	    System.out.println("********************");
+		for(int j=0;j<i;j++) {
+			System.out.println(pin1[j]+"  "+pin2[j]+"  "+cost[j]);
+		}
+		list = Arrays.asList(pin1);
+		list1 = Arrays.asList(pin2);
+		costs = Arrays.asList(cost);
+}
+	int calculate_amt(int weight) {
+		int amt=0;
+		
+		
+		 if(list.contains(pcode1)){
+			 if((list1.subList(list.indexOf(pcode1),list1.lastIndexOf(pcode1)+1)).contains(pcode2)) {
+	           // System.out.println(list1.subList(list.indexOf(pcode1),list.lastIndexOf(pcode1)+1));
+	            //int idx=;
+	            System.out.println(costs.get(list.indexOf(pcode1)+list1.subList(list.indexOf(pcode1),list.lastIndexOf(pcode1)+1).indexOf(pcode2)));
+				 amt=Integer.parseInt(costs.get(list.indexOf(pcode1)+list1.subList(list.indexOf(pcode1),list.lastIndexOf(pcode1)+1).indexOf(pcode2)))*weight;
+				 System.out.println("Your transaction will cost: "+amt);
+			 }
+		 else
+			 System.out.println("SORRY WE DONOT HAVE ANY DELIVERY SERVICES AVAILABLE AT THE REQUESTED LOCATIONS!");
+		 }
+		 else
+			 System.out.println("SORRY WE DONOT HAVE ANY DELIVERY SERVICES AVAILABLE AT THE REQUESTED LOCATIONS!");
+		return amt;
+	}
+	public void generate_labels() {
+		String label=new String();
+		label="\t\t      "+pcode1+"\t====> "+pcode2+"\n\t\t     "+city_1.get(pincode.indexOf(pcode1)).substring(city_1.get(pincode.indexOf(pcode1)).indexOf('('),city_1.get(pincode.indexOf(pcode1)).indexOf(')')+1)+"\t==>\t"+city_1.get(pincode.indexOf(pcode2)).substring(city_1.get(pincode.indexOf(pcode2)).indexOf('('),city_1.get(pincode.indexOf(pcode2)).indexOf(')')+1);
+		
+		System.out.println("\n\n\t\t**********");
+		System.out.println(label);
+		System.out.println("\t\t**********");
+	}
+	void bill(int amt) {
+		String custid;
+		String pass;
+		Scanner sc=new Scanner(System.in);
+		 System.out.println("Enter your details:\nCustomer Id:");
+		 custid=sc.nextLine();
+		 System.out.println("Password: ");
+		 pass=sc.nextLine();
+		 int i=search(custid,pass);
+		 if(i==-1)
+			 System.out.println("Customer Id not valid or Password Missmatch!!\nCreate a new Account or Enter valid Credentials");
+		 else
+			 super.bill(amt,custid);
+		 System.out.println("\n Generating Label............");
+		 
+		 generate_labels();
+			 
+	}
+	public void show_sheet() {
+		String citys[]=new String[5];
+		String code[]=new String[5];
+		String line = "";  
+		String splitBy = "-"; 
+		//pin_sheet pin[]=new pin_sheet[5]();
+		int i=0;
+		System.out.println("The Cities along with their pincodes are as follows:");
+		try {
+		BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\HP\\Desktop\\pincodes.csv")); 
+		while ((line = br.readLine()) != null)   //returns a Boolean value  
+		{  
+			
+			String[] city = line.split(splitBy);    // use comma as separator 
+			citys[i]=city[0].trim();
+			code[i]=city[1].trim();
+			i++;
+		System.out.println(city[0] + "----->>>"+city[1]+"\n" );  
+		}  
+	}
+		catch (IOException e)   
+		{  
+		e.printStackTrace();  
+		} 
+		/*for(int j=0;j<i;j++) {
+			System.out.println(citys[j]+"  "+code[j]);
+		}*/
+		//System.out.println(citys[0]);
+		city_1 = Arrays.asList(citys);
+	    pincode = Arrays.asList(code);
+	   // System.out.println(pincode.indexOf(("248001")));
+	}
+
+}
+
+
+public class sample2 {
+	Scanner sc=new Scanner(System.in);
+	String id,pass,src,dest;
+	void input() {
+		id=sc.nextLine();
+		pass=sc.nextLine();
+	}
+	void input_pin() {
+		src=sc.nextLine();
+		dest=sc.nextLine();
+	}
+	public static void main(String[] args)   
+	{  
+	
+	Scanner sc=new Scanner(System.in);
+	//pc.load();
+	
+	int ch=0;
+	int amt=0;
+	sample2 s=new sample2();
+	p2pbill pc=new p2pbill();
+	System.out.println("\n........................................................");
+	System.out.println("\n       WELCOME TO THE SHIPPING SERVICES PLATFORM        ");
+	System.out.println("\n........................................................");
+	do {
+		
+		System.out.println("\n1. Recharge your wallet");
+		System.out.println("2. Check for the pincode to pincode delivery price");
+		System.out.println("3. Place Shipment");
+		System.out.println("4. Login");
+		System.out.println("5. Exit");
+		System.out.print("Enter your choice:");
+		ch=sc.nextInt();
+		
+		 pc.pcode1=null;
+		 pc.pcode2=null;
+	switch(ch) {
+	
+	case 1:
+		System.out.println("Enter your Customer Id and Password:");
+		s.input();
+		
+		if(pc.search(s.id,s.pass)==-1)
+			System.out.println("Not a valid Usernameor password");
+			
+		else {
+			System.out.print("Enter the amount you want to add: ");
+			if(pc.recharge_wallet(sc.nextInt(), s.id)==1)
+				System.out.println("\nAmount added successfully!!");}
+		break;
+	case 2:
+		System.out.println("Press 1 for help in Pincodes: else press 2");
+		ch=sc.nextInt();
+		if(ch==1) {
+			System.out.println("\n********************");
+			pc.show_sheet();
+			System.out.println("********************\n\n");
+		}
+		
+		System.out.println("Enter Source and Destination Pincode:");
+		System.out.println("-------------");
+		s.input_pin();
+		pc.get_code(s.src,s.dest);
+		System.out.println("Enter the weight:");
+		amt=pc.calculate_amt(sc.nextInt());
+		if(amt!=0) {
+		System.out.println("Do you want to place shipment:(1. Yes 2.No )");
+		ch=sc.nextInt();
+		if(ch==1) {
+		    pc.bill(amt);
+		    break;
+		}
+		else
+			ch=5;
+		}
+		break;
+		
+	case 3:
+		System.out.println("Press 1 for help in Pincodes: else press 2");
+		ch=sc.nextInt();
+		if(ch==1) {
+			System.out.println("\n********************");
+			pc.show_sheet();
+			System.out.println("********************\n\n");
+		}
+		
+		System.out.println("Enter Source and Destination Pincode:");
+		System.out.println("-------------");
+		s.input_pin();
+		pc.get_code(s.src,s.dest);
+		System.out.println("Enter the weight:");
+		amt=pc.calculate_amt(sc.nextInt());
+		if(amt!=0) {
+		    pc.bill(amt);
+		}
+		break;
+	case 4:
+		System.out.println("Enter your Customer Id and Password:");
+		s.input();
+		if(pc.search(s.id,s.pass)==-1)
+			System.out.println("Not a valid Username or password");
+		else
+			pc.details(s.id);
+		break;
+	case 5:
+		System.out.println("\t\t ---------------------------");
+		System.out.println("\t\t| THANKYOU! NAVE A NICE DAY! |");
+		System.out.println("\t\t ---------------------------");
+		System.exit(0);
+
+	default:
+		System.out.println("Not a valid choice!!");
+		
+	}
+	System.out.println("\n\nDo you want to continue 1. Yes 2. No");
+	ch=sc.nextInt();
+	System.out.println("\t\t***************");
+	}while(ch==1);
+		
+
+	}
+}
